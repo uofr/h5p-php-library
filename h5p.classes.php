@@ -1511,7 +1511,7 @@ class H5PStorage {
    */
   public function deletePackage($content) {
     $this->h5pC->fs->deleteContent($content);
-    $this->h5pC->fs->deleteExport(($content['slug'] ? $content['slug'] . '-' : '') . $content['id'] . '.h5p');
+    $this->h5pC->deleteExport($content);
     $this->h5pF->deleteContentData($content['id']);
   }
 
@@ -1713,7 +1713,7 @@ Class H5PExport {
    * @param array $content object
    */
   public function deleteExport($content) {
-    $this->h5pC->fs->deleteExport(($content['slug'] ? $content['slug'] . '-' : '') . $content['id'] . '.h5p');
+    $this->h5pC->deleteExport($content);
   }
 
   /**
@@ -1948,10 +1948,10 @@ class H5PCore {
 
       if (!$content['slug']) {
         $content['slug'] = $this->generateContentSlug($content);
-
-        // Remove old export file
-        $this->fs->deleteExport($content['id'] . '.h5p');
       }
+
+      // Remove old export file
+      $this->deleteExport($content);
 
       // Cache.
       $this->h5pF->updateContentFields($content['id'], array(
@@ -1960,6 +1960,15 @@ class H5PCore {
       ));
     }
     return $params;
+  }
+
+  /**
+   * Delete .h5p file
+   *
+   * @param array $content object
+   */
+  public function deleteExport($content) {
+    $this->fs->deleteExport(($content['slug'] ? $content['slug'] . '-' : '') . $content['id'] . '.h5p');
   }
 
   /**
