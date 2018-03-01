@@ -1593,9 +1593,7 @@ Class H5PExport {
     );
 
     // Add dependencies to h5p
-    foreach ($content['dependencies'] as $dependency) {
-      $library = $dependency['library'];
-
+    foreach ($content['dependencies'] as $library) {
       try {
         $exportFolder = NULL;
 
@@ -1624,12 +1622,12 @@ Class H5PExport {
       }
 
       // Do not add editor dependencies to h5p json.
-      if ($dependency['type'] === 'editor') {
+      if ($library['dependencyType'] === 'editor') {
         continue;
       }
 
       // Add to h5p.json dependencies
-      $h5pJson[$dependency['type'] . 'Dependencies'][] = array(
+      $h5pJson[$library['dependencyType'] . 'Dependencies'][] = array(
         'machineName' => $library['machineName'],
         'majorVersion' => $library['majorVersion'],
         'minorVersion' => $library['minorVersion']
@@ -1953,12 +1951,6 @@ class H5PCore {
 
         // Remove old export file
         $this->fs->deleteExport($content['id'] . '.h5p');
-      }
-
-      if ($this->exportEnabled) {
-        // Recreate export file
-        $exporter = new H5PExport($this->h5pF, $this);
-        $exporter->createExportFile($content);
       }
 
       // Cache.
