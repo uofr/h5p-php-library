@@ -1746,6 +1746,7 @@ abstract class H5PPermission {
   const CREATE_RESTRICTED = 2;
   const UPDATE_LIBRARIES = 3;
   const INSTALL_RECOMMENDED = 4;
+  const ENABLE_GRADING = 5;
 }
 
 abstract class H5PDisplayOptionBehaviour {
@@ -1810,18 +1811,21 @@ class H5PCore {
   const DISABLE_EMBED = 4;
   const DISABLE_COPYRIGHT = 8;
   const DISABLE_ABOUT = 16;
+  const DISABLE_GRADING = 32;
 
   const DISPLAY_OPTION_FRAME = 'frame';
   const DISPLAY_OPTION_DOWNLOAD = 'export';
   const DISPLAY_OPTION_EMBED = 'embed';
   const DISPLAY_OPTION_COPYRIGHT = 'copyright';
   const DISPLAY_OPTION_ABOUT = 'icon';
+  const DISPLAY_OPTION_GRADING = 'grading';
 
   // Map flags to string
   public static $disable = array(
     self::DISABLE_FRAME => self::DISPLAY_OPTION_FRAME,
     self::DISABLE_DOWNLOAD => self::DISPLAY_OPTION_DOWNLOAD,
     self::DISABLE_EMBED => self::DISPLAY_OPTION_EMBED,
+    self::DISABLE_GRADING => self::DISPLAY_OPTION_GRADING,
     self::DISABLE_COPYRIGHT => self::DISPLAY_OPTION_COPYRIGHT
   );
 
@@ -2604,6 +2608,14 @@ class H5PCore {
         $embed == H5PDisplayOptionBehaviour::NEVER_SHOW) {
       $sources[self::DISPLAY_OPTION_EMBED] = ($embed == H5PDisplayOptionBehaviour::ALWAYS_SHOW);
     }
+		
+
+    // Grading - force setting it if always on or always off
+    $grading = $this->h5pF->getOption(self::DISPLAY_OPTION_GRADING, H5PDisplayOptionBehaviour::ALWAYS_SHOW);
+    if ($grading == H5PDisplayOptionBehaviour::ALWAYS_SHOW ||
+        $grading == H5PDisplayOptionBehaviour::NEVER_SHOW) {
+      $sources[self::DISPLAY_OPTION_GRADING] = ($grading == H5PDisplayOptionBehaviour::ALWAYS_SHOW);
+    }
 
     foreach (H5PCore::$disable as $bit => $option) {
       if (!isset($sources[$option]) || !$sources[$option]) {
@@ -2651,6 +2663,16 @@ class H5PCore {
           isset($current_display_options[self::DISPLAY_OPTION_EMBED]) ?
           $current_display_options[self::DISPLAY_OPTION_EMBED] :
           ($embed == H5PDisplayOptionBehaviour::CONTROLLED_BY_AUTHOR_DEFAULT_ON);
+      }
+			
+      // Grading
+      $grading = $this->h5pF->getOption(self::DISPLAY_OPTION_GRADING, H5PDisplayOptionBehaviour::ALWAYS_SHOW);
+      if ($grading == H5PDisplayOptionBehaviour::CONTROLLED_BY_AUTHOR_DEFAULT_ON ||
+          $grading == H5PDisplayOptionBehaviour::CONTROLLED_BY_AUTHOR_DEFAULT_OFF) {
+        $display_options[self::DISPLAY_OPTION_GRADING] =
+          isset($current_display_options[self::DISPLAY_OPTION_GRADING]) ?
+          $current_display_options[self::DISPLAY_OPTION_GRADING] :
+          ($grading == H5PDisplayOptionBehaviour::CONTROLLED_BY_AUTHOR_DEFAULT_ON);
       }
 
       // Copyright
@@ -2705,6 +2727,8 @@ class H5PCore {
     else {
       $this->setDisplayOptionOverrides(self::DISPLAY_OPTION_DOWNLOAD, H5PPermission::DOWNLOAD_H5P, $id, $display_options[self::DISPLAY_OPTION_DOWNLOAD]);
       $this->setDisplayOptionOverrides(self::DISPLAY_OPTION_EMBED, H5PPermission::EMBED_H5P, $id, $display_options[self::DISPLAY_OPTION_EMBED]);
+			
+      $this->setDisplayOptionOverrides(self::DISPLAY_OPTION_GRADING, H5PPermission::ENABLE_GRADING, $id, $display_options[self::DISPLAY_OPTION_GRADING]);
 
       if ($this->h5pF->getOption(self::DISPLAY_OPTION_COPYRIGHT, TRUE) == FALSE) {
         $display_options[self::DISPLAY_OPTION_COPYRIGHT] = false;
@@ -2725,6 +2749,7 @@ class H5PCore {
       self::DISPLAY_OPTION_FRAME => !($disable & H5PCore::DISABLE_FRAME),
       self::DISPLAY_OPTION_DOWNLOAD => !($disable & H5PCore::DISABLE_DOWNLOAD),
       self::DISPLAY_OPTION_EMBED => !($disable & H5PCore::DISABLE_EMBED),
+      self::DISPLAY_OPTION_GRADING => !($disable & H5PCore::DISABLE_GRADING),
       self::DISPLAY_OPTION_COPYRIGHT => !($disable & H5PCore::DISABLE_COPYRIGHT),
       self::DISPLAY_OPTION_ABOUT => !!$this->h5pF->getOption(self::DISPLAY_OPTION_ABOUT, TRUE),
     );
