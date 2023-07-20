@@ -66,7 +66,7 @@ function resizeIframes() {
 }
 
 window.addEventListener('load', function() {
-  // Resize all H5P iframes immediately
+  // Resize all H5P iframes immediately 
   resizeIframes();
 
   //Just in case Set a timeout to attempt resizing again after a certain period of time
