@@ -12,31 +12,33 @@ for (var i = 0; i < iframes.length; i++) {
   //originalHeights.push(iframe.offsetHeight);
 }
 
-var iframes = document.querySelectorAll('iframe');
-for (var i = 0; i < iframes.length; i++) {
-  const iframe = iframes[i];
-// Add a load event listener that will wait for all the dom elements, 1st to load.
+// Add a load event listener that will wait for all the DOM elements to load.
 window.addEventListener('load', function() {
-  //Use Mutation observer since (message API eventlistener) is not reliable to resize the iframe.
-  //which can lead to performance problems and unexpected behavior.
-  const newObserver = new MutationObserver(function(mutationsList, observer) {
-    for(var mutation of mutationsList) {
-      if (mutation.type === 'childList') {
-        //User has interacted with iframe content
-        console.log('User interacted with iframe content');
-        break;
-      } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        
-        resizeIframes();
-        console.log('H5P iframe has been resized to the correct value');
-        break;
+  // Loop through each iframe.
+  var iframes = document.querySelectorAll('iframe');
+  for (var i = 0; i < iframes.length; i++) {
+    const iframe = iframes[i];
+    
+    // Use Mutation observer since the (message API eventlistener) is not reliable to resize the iframe.
+    // which can lead to performance problems and unexpected behavior.
+    const newObserver = new MutationObserver(function(mutationsList, observer) {
+      for (var mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          // User has interacted with iframe content
+          console.log('User interacted with iframe content');
+        } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          // iframe style attribute has changed
+          resizeIframes();
+          console.log('H5P iframe has been resized to the correct value');
+        }
       }
-    }
-  });
+    });
 
-  newObserver.observe(iframe.contentWindow.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+    // Observe changes in the iframe's content.
+    newObserver.observe(iframe.contentWindow.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  }
 });
-}
+
 
 
 // Resize all H5P iframes, we are not going to use (message API eventlistener) is not reliable to resize the iframe and avoid flikering.
@@ -65,14 +67,8 @@ function resizeIframes() {
  
 }
 
-window.addEventListener('load', function() {
-  // Resize all H5P iframes immediately 
+window.onload = function() {
+  // Everything, including images and iframes, is fully loaded
   resizeIframes();
-
-  //Just in case Set a timeout to attempt resizing again after a certain period of time
-  setTimeout(function() {
-    resizeIframes();
-  }, 1000);
-
   console.log('Custom iframe resizing code loaded.');
-});
+};
