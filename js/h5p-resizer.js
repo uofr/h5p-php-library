@@ -1,57 +1,60 @@
-//UOFR Hack Custom H5P resizer
-//First find all iframes that contain "mod/hvp/embed.php" in the src attribute
+//UOFR Hack dapiawej Custom H5P iframes resizer update September 11, 2023
+//First we need to get iframes from H5P only.
 var iframes = document.querySelectorAll('iframe[src*="mod/hvp/embed.php"]');
 
 // Create an array to store the original height of each iframe
 var originalHeights = [];
 
-// Loop through each iframe and add the custom class and store the original height
+// Loop through each iframe and add the custom class
 for (var i = 0; i < iframes.length; i++) {
   var iframe = iframes[i];
   iframe.classList.add('h5p-custom-class');
   //originalHeights.push(iframe.offsetHeight);
 }
 
-// Add a load event listener that will wait for all the DOM elements to load.
+//var iframes = document.querySelectorAll('iframe');
 window.addEventListener('load', function() {
-  // Loop through each iframe.
-  var iframes = document.querySelectorAll('iframe');
-  for (var i = 0; i < iframes.length; i++) {
-    const iframe = iframes[i];
-    
-    // Use Mutation observer since the (message API eventlistener) is not reliable to resize the iframe.
-    // which can lead to performance problems and unexpected behavior.
-    const newObserver = new MutationObserver(function(mutationsList, observer) {
-      for (var mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-          // User has interacted with iframe content
-          console.log('User interacted with iframe content');
-        } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          // iframe style attribute has changed
-          resizeIframes();
-          console.log('H5P iframe has been resized to the correct value');
-        }
-      }
-    });
+for (var i = 0; i < iframes.length; i++) {
+  const iframe = iframes[i];
 
-    // Observe changes in the iframe's content.
-    newObserver.observe(iframe.contentWindow.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-  }
+  //we are going to use Mutation observer since (message API eventlistener) is not reliable to resize the iframe and avoid flikering.
+  //which can lead to performance problems and unexpected behavior.
+  const newObserver = new MutationObserver(function(mutationsList, observer) {
+    for(var mutation of mutationsList) {
+      if (mutation.type === 'childList') {
+        //User has interacted with iframe content
+        console.log('User interacted with iframe content');
+        break;
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        
+        resizeIframes();
+        console.log('H5P iframe has been resized to the correct value');
+        break;
+      }
+    }
+  });
+
+  newObserver.observe(iframe.contentWindow.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+
+}
 });
 
-// Resize all H5P iframes, we are not going to use (message API eventlistener) is not reliable to resize the iframe and avoid flikering.
 function resizeIframes() {
   // Loop through each iframe with the custom class
   var iframes = document.querySelectorAll('.h5p-custom-class');
   for (var i = 0; i < iframes.length; i++) {
     var iframe = iframes[i];
-    console.log('Iframe ready:', iframe);
+    //console.log('Iframe ready:', iframe);
 
-    // Set iframe height based on content
-    const elements = iframe.contentWindow.document.querySelectorAll('.completion-info');
-    for (let i = 0; i < elements.length; i++) {
-      elements[i].style.display = "none";
-    }
+   // Hide the completion button since we don't need it and avoid vertical scrollbars
+   const elements = iframe.contentWindow.document.querySelectorAll('.activity-header');
+   for (let j = 0; j < elements.length; j++) {
+     
+     elements[j].style.height = "0";
+     elements[j].style.width = "0";
+     elements[j].style.overflow = "hidden";
+     elements[j].style.visibility = "hidden";
+   }
     var sectionEmbed = iframe.contentWindow.document.querySelector('.embedded-main');
     var sectionHeight = sectionEmbed.offsetHeight;
     //console.log('Section height:', sectionHeight);
@@ -66,7 +69,9 @@ function resizeIframes() {
 }
 
 window.onload = function() {
-  // Everything, including images and iframes, is fully loaded
+  
   resizeIframes();
   console.log('Custom iframe resizing code loaded.');
 };
+
+
