@@ -39,8 +39,6 @@ window.addEventListener('load', function() {
   }
 });
 
-
-
 // Resize all H5P iframes, we are not going to use (message API eventlistener) is not reliable to resize the iframe and avoid flikering.
 function resizeIframes() {
   // Loop through each iframe with the custom class
