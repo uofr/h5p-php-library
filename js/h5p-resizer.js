@@ -47,14 +47,15 @@ function resizeIframes() {
     //console.log('Iframe ready:', iframe);
 
    // Hide the completion button since we don't need it and avoid vertical scrollbars
-   const elements = iframe.contentWindow.document.querySelectorAll('.activity-header');
+   /*const elements = iframe.contentWindow.document.querySelectorAll('.activity-header');
    for (let j = 0; j < elements.length; j++) {
      
      elements[j].style.height = "0";
      elements[j].style.width = "0";
      elements[j].style.overflow = "hidden";
      elements[j].style.visibility = "hidden";
-   }
+   }*/
+   
     var sectionEmbed = iframe.contentWindow.document.querySelector('.embedded-main');
     var sectionHeight = sectionEmbed.offsetHeight;
     //console.log('Section height:', sectionHeight);
