@@ -2097,8 +2097,8 @@ class H5PCore {
     'js/h5p-utils.js',
   );
 
-  public static $defaultContentWhitelist = 'json png jpg jpeg gif bmp tif tiff svg eot ttf woff woff2 otf webm mp4 ogg mp3 m4a wav txt pdf rtf doc docx xls xlsx ppt pptx odt ods odp xml csv diff patch swf md textile vtt webvtt gltf glb';
-  public static $defaultLibraryWhitelistExtras = 'js css';
+  public static $defaultContentWhitelist = 'json png jpg jpeg gif bmp tif tiff eot ttf woff woff2 otf webm mp4 ogg mp3 m4a wav txt pdf rtf doc docx xls xlsx ppt pptx odt ods odp csv diff patch swf md textile vtt webvtt gltf glb';
+  public static $defaultLibraryWhitelistExtras = 'js css svg xml';
 
   public $librariesJsonData, $contentJsonData, $mainJsonData, $h5pF, $fs, $h5pD, $disableFileCheck;
   const SECONDS_IN_WEEK = 604800;
@@ -3780,7 +3780,12 @@ class H5PCore {
       'keywordsExits' => $this->h5pF->t('Keywords already exists!'),
       'someKeywordsExits' => $this->h5pF->t('Some of these keywords already exist'),
       'width' => $this->h5pF->t('width'),
-      'height' => $this->h5pF->t('height')
+      'height' => $this->h5pF->t('height'),
+      'rotateLeft' => $this->h5pF->t('Rotate Left'),
+      'rotateRight' => $this->h5pF->t('Rotate Right'),
+      'cropImage' => $this->h5pF->t('Crop Image'),
+      'confirmCrop' => $this->h5pF->t('Confirm Crop'),
+      'cancelCrop' => $this->h5pF->t('Cancel Crop')
     );
   }
 
@@ -3958,7 +3963,6 @@ class H5PCore {
     }
 
     if (empty($siteUuid) || empty($secret)) {
-      $this->h5pF->setErrorMessage($this->h5pF->t('Missing Site UUID or Hub Secret. Please check your Hub registration.'));
       return false;
     }
 
