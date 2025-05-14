@@ -378,10 +378,11 @@ H5P.init = function (target) {
     const contentData = H5PIntegration.contents['cid-' + contentId];
     const contentLanguage = contentData && contentData.metadata && contentData.metadata.defaultLanguage
       ? contentData.metadata.defaultLanguage : 'en';
+    const darkmodeclass = $iframe.data('darkmodeclass');
 
     const writeDocument = function () {
       iframe.contentDocument.open();
-      iframe.contentDocument.write('<!doctype html><html class="h5p-iframe" lang="' + contentLanguage + '"><head>' + H5P.getHeadTags(contentId) + '</head><body><div class="h5p-content" data-content-id="' + contentId + '"/></body></html>');
+      iframe.contentDocument.write('<!doctype html><html class="h5p-iframe ' + darkmodeclass + '" lang="' + contentLanguage + '"><head>' + H5P.getHeadTags(contentId) + '</head><body><div class="h5p-content" data-content-id="' + contentId + '"/></body></html>');
       iframe.contentDocument.close();
     };
 
