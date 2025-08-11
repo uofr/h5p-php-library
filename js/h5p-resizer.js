@@ -1,69 +1,99 @@
 //UOFR Hack dapiawej Custom H5P iframes resizer update September 13, 2023
 //First we need to get iframes from H5P only.
-var iframes = document.querySelectorAll('iframe[src*="mod/hvp/embed.php"]');
+// Function to initialize resize and observer for a single iframe
+console.log('[H5P Resizer] Script initialized.');
 
-// Create an array to store the original height of each iframe
-var originalHeights = [];
+// Function to initialize resize and observer for a single iframe
+function initIframeResize(iframe) {
+  if (iframe.classList.contains('h5p-custom-class')) {
+    console.log('[H5P Resizer] Skipped — already initialized:', iframe);
+    return; // Prevent double init
+  }
 
-// Loop through each iframe and add the custom class 
-for (var i = 0; i < iframes.length; i++) {
-  var iframe = iframes[i];
   iframe.classList.add('h5p-custom-class');
+  console.log('[H5P Resizer] Initializing iframe:', iframe);
 
-}
+  iframe.addEventListener('load', function() {
+    console.log('[H5P Resizer] Iframe loaded, setting up observer:', iframe);
 
+    try {
+      const doc = iframe.contentWindow.document;
 
-for (var i = 0; i < iframes.length; i++) {
-  const iframe = iframes[i];
+      const observer = new MutationObserver(function(mutationsList) {
+        console.log('[H5P Resizer] Mutation observed in iframe:', iframe);
+        for (let mutation of mutationsList) {
+          if (
+            mutation.type === 'childList' ||
+            (mutation.type === 'attributes' && mutation.attributeName === 'style')
+          ) {
+            console.log('[H5P Resizer] Triggering resize due to mutation:', mutation);
+            resizeSingleIframe(iframe);
+            break;
+          }
+        }
+      });
 
-// Add a load event listener that will wait for all the dom elements, 1st to load.
-window.addEventListener('load', function() {
+      observer.observe(doc, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style']
+      });
 
-  //Use Mutation observer since (message API eventlistener) is not reliable to resize the iframe and avoid flikering.
-  //which can lead to performance problems and unexpected behavior.
-  const newObserver = new MutationObserver(function(mutationsList, observer) {
-    for(var mutation of mutationsList) {
-      if (mutation.type === 'childList') {
-        //User has interacted with iframe content
-        console.log('User interacted with iframe content');
-        break;
-      } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-        
-        resizeIframes();
-        
-        break;
-      }
+      console.log('[H5P Resizer] MutationObserver attached for iframe.');
+      resizeSingleIframe(iframe);
+
+    } catch (e) {
+      console.warn('[H5P Resizer] Could not observe iframe:', e);
     }
   });
-
-  newObserver.observe(iframe.contentWindow.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
-});
 }
 
-function resizeIframes() {
-  // Loop through each iframe with the custom class
-  var iframes = document.querySelectorAll('.h5p-custom-class');
-  for (var i = 0; i < iframes.length; i++) {
-    var iframe = iframes[i];
-    //console.log('Iframe ready:', iframe);
+// Resize only the given iframe
+function resizeSingleIframe(iframe) {
+  try {
+    const sectionEmbed = iframe.contentWindow.document.querySelector('.embedded-main');
+    if (!sectionEmbed) {
+      console.warn('[H5P Resizer] .embedded-main not found in iframe.');
+      return;
+    }
 
-  
-    var sectionEmbed = iframe.contentWindow.document.querySelector('.embedded-main');
-    var sectionHeight = sectionEmbed.offsetHeight;
-    //console.log('Section height:', sectionHeight);
-    var newHeightWithExtra = sectionHeight + 30;
-    originalHeights[i] = newHeightWithExtra;
-    iframe.style.height = newHeightWithExtra + 'px';
+    const sectionHeight = sectionEmbed.offsetHeight;
+    const newHeight = sectionHeight + 30;
+
+    iframe.style.height = newHeight + 'px';
     iframe.style.width = '100%';
-    console.log('Result - Iframe height + Section height:', newHeightWithExtra);
-    console.log('H5P iframe has been resized to the correct value');
+
+    console.log('[H5P Resizer] Resized iframe to height:', newHeight);
+  } catch (e) {
+    console.warn('[H5P Resizer] Error resizing iframe:', e);
   }
- 
 }
-window.onload = function() {
-  // Everything, including images and iframes, is fully loaded
-  resizeIframes();
-  console.log('Custom iframe resizing code loaded.');
-};
 
+// Process all current iframes on the page
+function initAllCurrentIframes() {
+  console.log('[H5P Resizer] Scanning for existing iframes...');
+  document.querySelectorAll('iframe[src*="mod/hvp/embed.php"]').forEach(initIframeResize);
+}
 
+// Initial run for existing iframes
+initAllCurrentIframes();
+
+// Watch for new iframes injected by AJAX
+new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+    mutation.addedNodes.forEach(function(node) {
+      if (node.tagName === 'IFRAME' && node.src.includes('mod/hvp/embed.php')) {
+        console.log('[H5P Resizer] Detected new iframe via AJAX:', node);
+        initIframeResize(node);
+      } else if (node.nodeType === 1) {
+        //check inside containers (in case iframe is nested in a div)
+        const nestedIframes = node.querySelectorAll?.('iframe[src*="mod/hvp/embed.php"]');
+        if (nestedIframes && nestedIframes.length > 0) {
+          console.log('[H5P Resizer] Detected nested iframes via AJAX:', nestedIframes);
+          nestedIframes.forEach(initIframeResize);
+        }
+      }
+    });
+  });
+}).observe(document.body, { childList: true, subtree: true });
