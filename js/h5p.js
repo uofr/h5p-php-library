@@ -383,9 +383,7 @@ H5P.init = function (target) {
     const categoryclass = $iframe.data('categoryid');
 
     const writeDocument = function () {
-      iframe.contentDocument.open();
-      iframe.contentDocument.write('<!doctype html><html class="h5p-iframe ' + darkmodeclass + ' ' + courseclass + ' ' + categoryclass + ' ' + '" lang="' + contentLanguage + '"><head>' + H5P.getHeadTags(contentId) + '</head><body><div class="h5p-content" data-content-id="' + contentId + '"/></body></html>');
-      iframe.contentDocument.close();
+      iframe.srcdoc = '<!doctype html><html class="h5p-iframe ' + darkmodeclass + ' ' + courseclass + ' ' + categoryclass + ' ' + '" lang="' + contentLanguage + '"><head>' + H5P.getHeadTags(contentId) + '</head><body><div class="h5p-content" data-content-id="' + contentId + '"/></body></html>';
     };
 
     $iframe.addClass('h5p-initialized')
