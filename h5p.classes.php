@@ -2053,8 +2053,8 @@ abstract class H5PContentStatus {
 }
 
 abstract class H5PHubEndpoints {
-  const CONTENT_TYPES = 'api.h5p.org/v1/content-types/';
-  const SITES = 'api.h5p.org/v1/sites';
+  const CONTENT_TYPES = 'hub-api.h5p.org/v1/content-types/';
+  const SITES = 'hub-api.h5p.org/v1/sites';
   const METADATA = 'hub-api.h5p.org/v1/metadata';
   const CONTENT = 'hub-api.h5p.org/v1/contents';
   const REGISTER = 'hub-api.h5p.org/v1/accounts';
@@ -3913,6 +3913,13 @@ class H5PCore {
 
       return true;
     }
+
+    if ($response['status'] === 403) {
+      // Unauthenticated, cannot find hub secret and site uuid combination
+      $this->h5pF->resetHubOrganizationData();
+      return false;
+    }
+
     $msg = $this->h5pF->t('Content unpublish failed');
     $this->h5pF->setErrorMessage($msg);
 
