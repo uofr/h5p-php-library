@@ -54,7 +54,7 @@ H5P.ContentUpgradeProcess = (function (Version) {
       if (err) {
         return done(err);
       }
-      if (library.semantics === null) {
+      if (library.semantics === null || library.semantics === undefined) {
         return done({
           type: 'libraryMissing',
           library: library.name + ' ' + library.version.major + '.' + library.version.minor

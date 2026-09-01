@@ -2072,12 +2072,15 @@ class H5PCore {
 
   public static $coreApi = array(
     'majorVersion' => 1,
-    'minorVersion' => 27
+    'minorVersion' => 28
   );
   public static $styles = array(
+    'styles/h5p-fonts.css',
     'styles/h5p.css',
     'styles/h5p-confirmation-dialog.css',
     'styles/h5p-core-button.css',
+    'styles/h5p-theme.css',
+    'styles/h5p-theme-variables.css',
     'styles/h5p-tooltip.css',
     'styles/h5p-table.css',
   );
@@ -2187,9 +2190,6 @@ class H5PCore {
       $content['id'] = $this->h5pF->insertContent($content, $contentMainId);
     }
 
-    // Some user data for content has to be reset when the content changes.
-    $this->h5pF->resetContentUserData($contentMainId ? $contentMainId : $content['id']);
-
     return $content['id'];
   }
 
@@ -2292,6 +2292,9 @@ class H5PCore {
       $this->h5pF->deleteLibraryUsage($content['id']);
       $this->h5pF->saveLibraryUsage($content['id'], $content['dependencies']);
 
+      // Invalidate user data that depends on content params
+      $this->h5pF->resetContentUserData($content['id']);
+
       if (!$content['slug']) {
         $content['slug'] = $this->generateContentSlug($content);
 
@@ -2309,6 +2312,7 @@ class H5PCore {
       // Cache.
       $this->h5pF->updateContentFields($content['id'], array(
         'filtered' => $params,
+        'filtered_hash' => hash('sha256', $params),
         'slug' => $content['slug']
       ));
     }
